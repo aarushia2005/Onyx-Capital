@@ -11,12 +11,19 @@ from datetime import datetime
 import streamlit as st
 
 # --- 1. CONFIGURATION ---
+# 🔒 SECURE LOADING: This looks for the key in Streamlit Secrets
+# It will NO LONGER crash if you upload this to GitHub.
 try:
     GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 except:
-    GOOGLE_API_KEY = "[google_api_key]" 
+    # This is just a fallback for local testing if you don't have secrets set up
+    # DO NOT paste your actual key here before uploading to GitHub
+    st.error("Google API Key not found. Please add it to Streamlit Secrets.")
+    GOOGLE_API_KEY = "" 
 
-genai.configure(api_key=GOOGLE_API_KEY)
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+
 DB_NAME = "expenses.db"
 
 # --- 2. DATABASE MANAGEMENT ---
@@ -66,7 +73,6 @@ def update_credentials(old_username, new_password):
     return True
 
 def update_username(current_username, new_username):
-    # Updates username safely
     try:
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
@@ -154,12 +160,12 @@ def get_working_model_name():
         pass
     return valid_model
 
-# --- AI LOGIC (FAIL-SAFE MODE) ---
+# --- AI LOGIC ---
 def analyze_image_direct(uploaded_file):
     try:
         image = Image.open(uploaded_file)
         model_name = get_working_model_name()
-        print(f"Onyx Vision: Using model {model_name}")
+        # print(f"Onyx Vision: Using model {model_name}") # Removed print for clean logs
         model = genai.GenerativeModel(model_name)
         
         prompt = """
@@ -194,5 +200,5 @@ def get_chat_response(query, persona="Generic", enable_guru=True):
         response = chat.send_message(f"{sys_msg}\nUser: {query}")
         return response.text
     except Exception as e:
-
         return f"System Error: {str(e)[:100]}. Please try again later."
+
