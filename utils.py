@@ -14,7 +14,7 @@ import streamlit as st
 try:
     GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 except:
-    GOOGLE_API_KEY = "AIzaSyB3fR11IXOkiFLvINzW30q5_13i1DGH5AM" 
+    GOOGLE_API_KEY = "[google_api_key]" 
 
 genai.configure(api_key=GOOGLE_API_KEY)
 DB_NAME = "expenses.db"
@@ -194,4 +194,5 @@ def get_chat_response(query, persona="Generic", enable_guru=True):
         response = chat.send_message(f"{sys_msg}\nUser: {query}")
         return response.text
     except Exception as e:
+
         return f"System Error: {str(e)[:100]}. Please try again later."
